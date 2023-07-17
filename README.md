@@ -1,2 +1,2 @@
-# SomeCompany_Survey_Analysis
+# SomeCompany Survey Analysis
 Survey Data analysis based on Likert scale
