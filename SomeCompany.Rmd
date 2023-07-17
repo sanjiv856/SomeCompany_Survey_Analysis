@@ -1,0 +1,1077 @@
+---
+title: "SomeCompany4"
+author: "Sanjiv"
+date: ""
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Loading libraries and data 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, include=TRUE, fig.align = 'center', out.width = "100%"}
+
+library(tidyverse)
+library(RColorBrewer)
+library(grid)
+library(gtable)
+library(ggthemes)
+library(cowplot)
+
+SomeCompanyData <- read_csv("data.csv")
+str(SomeCompanyData)
+class(SomeCompanyData)
+summary(SomeCompanyData)
+
+SomeCompanyData[] <- lapply(SomeCompanyData, factor)
+data <- SomeCompanyData[c(-1, -2)]
+data$RedeemVoucher <- as.numeric(levels(data$RedeemVoucher))[data$RedeemVoucher]
+
+# Changing sequence of the factor label for EatingOutside
+data$EatingOutside <- factor(data$EatingOutside, 
+                             levels = c("Daily", "Weekly", "Monthly", "Yearly"))
+
+# CAUTION Changing Factor
+# data$CombinedLoyltyApp <- factor(data$CombinedLoyltyApp, 
+#                              levels = c("No", "Yes", "Not sure"))
+data$Gender <- factor(data$Gender, 
+                      levels = c("Female", "Male"))
+data$Age <- factor(data$Age, 
+                   levels = c("<18", "19-24", "25-29", "30-40", "41-50", "51-60"))
+
+data$Occupation <- factor(data$Occupation, 
+                         levels = c("Employed", "Unemployed", "Student") )
+
+data$RelationshipStatus <- factor(data$RelationshipStatus, 
+                                  levels = c("Single", "In a Relationship", "Sambo with Partner", "Sambo with Kids", "Married", "Married with Kids"))
+
+data$EatingInSameRestaurant <- factor(data$EatingInSameRestaurant, 
+                             levels = c("Daily", "Weekly", "Monthly", "Yearly"))
+
+data$UseLoyaltyApps <- factor(data$UseLoyaltyApps, 
+                              levels = c("No", "Yes"))
+
+data$FreqUsageOfLoyaltyApps <- factor(data$FreqUsageOfLoyaltyApps, 
+                                      levels = c("Daily", "Weekly", "Monthly", "Yearly", "Never"))
+
+data$AreYouLoyalCustomer <- factor(data$AreYouLoyalCustomer, 
+                                   levels = c("No", "Yes", "Not Sure"))
+
+# data$AppSuggestion <- factor(data$AppSuggestion, 
+#                              levels = c())
+
+data$CombinedLoyltyApp <- factor(data$CombinedLoyltyApp, 
+                                 levels = c("No", "Yes", "Not Sure"))
+
+
+summary(data)
+glimpse(data)
+
+####################################################
+```
+
+#### Multiple pannel graphs 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, include=TRUE, fig.align = 'center', out.width = "100%"}
+
+################################################################################
+# Bar Plots Multipannel 
+################################################################################
+
+# Figure 1, Gender, Age, RelationshipStatus
+
+
+# Gender Count
+dataGender <- data %>% 
+  group_by(Gender) %>% 
+  summarise(count = n())
+
+plotGender <- ggplot(dataGender, aes(x = Gender, y = count)) +
+  geom_bar(fill = "#0073C2FF", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("Gender") +
+  # scale_fill_viridis_d(option = "plasma") +
+  scale_colour_pander() +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+plotGenderFlip <- ggplot(dataGender, aes(x = Gender, y = count)) +
+  geom_bar(fill = "#0073C2FF", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = 0.4, hjust = -0.4, size = 7) +
+  ylab("Count") +
+  xlab("Gender") +
+  # scale_fill_viridis_d(option = "plasma") +
+  scale_colour_pander() +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) +
+  coord_flip()
+
+# ggsave(filename = "Figures/GenderCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# Age Count
+dataAge <- data %>% 
+  group_by(Age) %>% 
+  summarise(count = n())
+
+plotAge <- ggplot(dataAge, aes(x = Age, y = count)) +
+  geom_bar(fill = "#D55E00", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("How old are you?") +
+  # scale_fill_viridis_d(option = "plasma") +
+  scale_colour_pander() +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+plotAgeFlip <- ggplot(dataAge, aes(x = Age, y = count)) +
+  geom_bar(fill = "#D55E00", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = 0.4, hjust = -0.4, size = 7) +
+  ylab("Count") +
+  xlab("How old are you?") +
+  # scale_fill_viridis_d(option = "plasma") +
+  scale_colour_pander() +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) +
+  coord_flip()
+
+# ggsave(filename = "Figures/AgeCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# Relationship Count
+dataRelationship <- data %>% 
+  group_by(RelationshipStatus) %>% 
+  summarise(count = n())
+
+plotRelationship <- ggplot(dataRelationship, aes(x = RelationshipStatus, y = count)) +
+  geom_bar(fill = "#117733", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("Relationship Status") +
+  #scale_fill_viridis_d(option = "plasma") +
+  # scale_colour_pander() +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold"), 
+        axis.text.x = element_text(size = 24)) 
+
+plotRelationshipFlip <- ggplot(dataRelationship, aes(x = RelationshipStatus, y = count)) +
+  geom_bar(fill = "#117733", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = 0.4, hjust = -0.4, size = 7) +
+  ylab("Count") +
+  xlab("Relationship Status") +
+  #scale_fill_viridis_d(option = "plasma") +
+  # scale_colour_pander() +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) +
+        # axis.text.x = element_text(size = 9)) + 
+  coord_flip()
+
+
+# ggsave(filename = "Figures/RelationshipCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+# , angle = 45, hjust = 1
+# place multiple plots into a grid, with labels
+# plot_grid(p, p, p, p, labels = "AUTO")
+toprow <- plot_grid(plotGender, plotAge, labels = c("A", "B"), label_size = 24)
+bottomrow <- plot_grid(plotRelationship, labels = c("C"), label_size = 24)
+
+Figure1 <- plot_grid(toprow, bottomrow, nrow = 2)
+Figure1
+
+# Figure1Flip <- plot_grid(plotGenderFlip, plotAgeFlip, plotRelationshipFlip, labels = c("A", "B", "C"), nrow = 1)
+# 
+# Figure1FlipCol1 <- plot_grid(plotGenderFlip, plotAgeFlip, plotRelationshipFlip, labels = c("A", "B", "C"), ncol = 1)
+
+ggsave(filename = "Figures/Figure_1.jpg", width = 50, height = 40, units = "cm", dpi = 400)
+### END OF FIG 1 ###########
+
+# save_plot("Figures/Figure_1.jpg", Figure1, base_height = 4, base_width = 5)
+# ggsave(filename = "Figures/Figure_1.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+
+# Occupation Count
+dataOccupation <- data %>% 
+  group_by(Occupation) %>% 
+  summarise(count = n())
+
+plotOccupation <- ggplot(dataOccupation, aes(x = Occupation, y = count)) +
+  geom_bar(fill = "#D55E00", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("What is your current occupation?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/OccupationCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# Income Count
+
+dataIncome <- data %>% 
+  group_by(Income) %>% 
+  summarise(count = n())
+
+plotIncome <- ggplot(dataIncome, aes(x = Income, y = count)) +
+  geom_bar(fill = "#0072B2", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("What is your income (SEK/month)?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold"), 
+        axis.text.x = element_text(size = 14)) 
+
+# ggsave(filename = "Figures/IncomeCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# toprow <- plot_grid(plotGender, plotAge, labels = c("A", "B"), label_size = 24)
+# bottomrow <- plot_grid(plotRelationship, labels = c("C"), label_size = 24)
+
+Figure2 <- plot_grid(plotOccupation, plotIncome, labels = c("A", "B"), label_size = 24)
+
+Figure2
+
+# Figure1Flip <- plot_grid(plotGenderFlip, plotAgeFlip, plotRelationshipFlip, labels = c("A", "B", "C"), nrow = 1)
+# 
+# Figure1FlipCol1 <- plot_grid(plotGenderFlip, plotAgeFlip, plotRelationshipFlip, labels = c("A", "B", "C"), ncol = 1)
+
+ggsave(filename = "Figures/Figure_2.jpg", width = 50, height = 20, units = "cm", dpi = 400)
+
+
+# EatingOutside Count
+
+dataEatingOutside <- data %>% 
+  group_by(EatingOutside) %>% 
+  summarise(count = n())
+
+plotEatingOutside <- ggplot(dataEatingOutside, aes(x = EatingOutside, y = count)) +
+  geom_bar(fill = "#009E73", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("How often do you buy food from a restaurant?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 18), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/EatingOutsideCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# EatingInSameRestaurant Count
+
+dataEatingInSameRestaurant <- data %>% 
+  group_by(EatingInSameRestaurant) %>% 
+  summarise(count = n())
+
+plotEatingInSameRestaurant <- ggplot(dataEatingInSameRestaurant, aes(x = EatingInSameRestaurant, y = count)) +
+  geom_bar(fill = "#332288", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("How often do you go to the same restaurant, café or bar?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 18), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/EatingInSameRestaurantCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# RedeemVoucher Count, CAUTION many things changed 
+
+dataRedeemVoucher <- data %>% 
+  group_by(RedeemVoucher) %>% 
+  summarise(count = n())
+
+plotRedeemVoucher <- ggplot(dataRedeemVoucher, aes(x = RedeemVoucher, y = count)) +
+  geom_bar(fill = "#882255", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab(paste("Reasonable number of times for you to buy a meal (worth around 100sek)",  "\nat the same restaurant before getting a voucher (value 100sek)?")) +
+  scale_x_continuous(breaks=seq(1, 10, 1)) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 18), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/RedeemVoucherCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# AreYouLoyalCustomer Count
+
+dataAreYouLoyalCustomer <- data %>% 
+  group_by(AreYouLoyalCustomer) %>% 
+  summarise(count = n())
+
+plotAreYouLoyalCustomer <- ggplot(dataAreYouLoyalCustomer, 
+                                  aes(x = AreYouLoyalCustomer, y = count)) +
+  geom_bar(fill = "#AA4499", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("Do you consider yourself to be a loyal customer to any restaurant/café/bar?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 18), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/AreYouLoyalCustomerCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+Figure3 <- plot_grid(plotEatingOutside, plotEatingInSameRestaurant, plotRedeemVoucher, plotAreYouLoyalCustomer, labels = c("A", "B", "C", "D"), nrow = 2, ncol = 2, label_size = 24)
+
+Figure3
+
+ggsave(filename = "Figures/Figure_3.jpg", width = 50, height = 40, units = "cm", dpi = 400)
+
+
+# UseLoyaltyApps Count
+
+dataUseLoyaltyApps <- data %>% 
+  group_by(UseLoyaltyApps) %>% 
+  summarise(count = n())
+
+plotUseLoyaltyApps <- ggplot(dataUseLoyaltyApps, aes(x = UseLoyaltyApps, y = count)) +
+  geom_bar(fill = "#E69F00", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("Do you currently use a customer loyalty app/stamp cards?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/UseLoyaltyAppsCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# FreqUsageOfLoyaltyApps Count
+
+dataFreqUsageOfLoyaltyApps <- data %>% 
+  group_by(FreqUsageOfLoyaltyApps) %>% 
+  summarise(count = n())
+
+plotFreqUsageOfLoyaltyApps <- ggplot(dataFreqUsageOfLoyaltyApps, aes(x = FreqUsageOfLoyaltyApps, y = count)) +
+  geom_bar(fill = "#117733", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("How often do you use customer loyalty apps/stamp cards?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/FreqUsageOfLoyaltyAppsCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# CombinedLoyltyApp Count 
+dataCombinedLoyltyApp <- data %>% 
+  group_by(CombinedLoyltyApp) %>% 
+  summarise(count = n())
+
+plotCombinedLoyltyApp <- ggplot(dataCombinedLoyltyApp, aes(x = CombinedLoyltyApp, y = count)) +
+  geom_bar(fill = "#AA4499", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab(paste("Would you be interested in an app for all restaurants, bars and", "\n cafeés that combines loyalty purchases in one?")) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold")) 
+
+# ggsave(filename = "Figures/CombinedLoyltyAppCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+# AppSuggestion Count
+
+dataAppSuggestion <- data %>% 
+  group_by(AppSuggestion) %>% 
+  summarise(count = n())
+
+plotAppSuggestion <- ggplot(dataAppSuggestion, aes(x = AppSuggestion, y = count)) +
+  geom_bar(fill = "#999933", stat = "identity", width = 0.6) +
+  geom_text(aes(label = count), vjust = -0.3, hjust = 0.5, size = 7) +
+  ylab("Count") +
+  xlab("How did you discover the most recent App you downloaded?") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=24, face = "bold"),
+        axis.text.x = element_text(size = 12)) 
+
+# ggsave(filename = "Figures/AppSuggestionCount.jpg", width = 30, height = 20, units = "cm", dpi = 600)
+
+Figure4 <- plot_grid(plotUseLoyaltyApps, plotFreqUsageOfLoyaltyApps, plotCombinedLoyltyApp, plotAppSuggestion, labels = c("A", "B", "C", "D"), nrow = 2, ncol = 2, label_size = 24)
+
+Figure4
+
+ggsave(filename = "Figures/Figure_4.jpg", width = 50, height = 40, units = "cm", dpi = 400)
+
+
+################################################################################
+# End of Bar Plots Multipannel
+################################################################################
+
+```
+
+#### Final Plots Selected with facet labels
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, include=TRUE, fig.align = 'center', out.width = "100%"}
+
+####################################################
+# Final Plots Selected with facet labels 
+####################################################
+
+# EatingOutside vs ...
+p <- ggplot(data, aes(x=Age, y=Income, color=RelationshipStatus, shape=Gender)) +
+  geom_point(size = 4, alpha = 1, stroke = 2) +
+  facet_grid(EatingOutside ~ AppSuggestion) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=16, face = "bold"), 
+        axis.text.x = element_text(angle = 45, hjust = 1), 
+        strip.text.x = element_text(size = 11)) 
+
+# strip.text.x = element_text(size = 8, colour = "red", angle = 90)
+# Labels 
+labelR = "How often do you buy food from a restaurant?"
+labelT = "The most recent app you have downloaded, how did you discover it?"
+
+# Get the ggplot grob
+z <- ggplotGrob(p)
+
+# Get the positions of the strips in the gtable: t = top, l = left, ...
+posR <- subset(z$layout, grepl("strip-r", name), select = t:r)
+posT <- subset(z$layout, grepl("strip-t", name), select = t:r)
+
+# Add a new column to the right of current right strips, 
+# and a new row on top of current top strips
+width <- z$widths[max(posR$r)]    # width of current right strips
+height <- z$heights[min(posT$t)]  # height of current top strips
+
+z <- gtable_add_cols(z, width, max(posR$r))  
+z <- gtable_add_rows(z, height, min(posT$t)-1)
+
+# Construct the new strip grobs
+stripR <- gTree(name = "Strip_right", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelR, rot = -90, gp = gpar(fontsize = 16, col = "grey10"))))
+
+stripT <- gTree(name = "Strip_top", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelT, gp = gpar(fontsize = 16, col = "grey10"))))
+
+# Position the grobs in the gtable
+z <- gtable_add_grob(z, stripR, t = min(posR$t)+1, 
+                     l = max(posR$r) + 1, b = max(posR$b)+1, name = "strip-right")
+z <- gtable_add_grob(z, stripT, t = min(posT$t), 
+                     l = min(posT$l), r = max(posT$r), name = "strip-top")
+
+
+# Add small gaps between strips
+z <- gtable_add_cols(z, unit(1/5, "line"), max(posR$r))
+z <- gtable_add_rows(z, unit(1/5, "line"), min(posT$t))
+
+
+# Draw it
+grid.newpage()
+grid.draw(z)
+
+ggsave(filename = "Figures/EatingOutside_AppSuggestion_GridLabel.jpg", width = 40, height = 20, units = "cm", dpi = 600, plot = z)
+
+#### 
+
+p <- ggplot(data, aes(x=Age, y=Income, color=RelationshipStatus, shape=Gender)) +
+  geom_point(size = 4, alpha = 1, stroke = 2) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=16, face = "bold"), 
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(EatingOutside ~ EatingInSameRestaurant)
+
+# strip.text.x = element_text(size = 8, colour = "red", angle = 90)
+# Labels 
+labelR = "How often do you buy food from a restaurant?"
+labelT = "How often do you go to the same restaurant, café or bar?"
+
+# Get the ggplot grob
+z <- ggplotGrob(p)
+
+# Get the positions of the strips in the gtable: t = top, l = left, ...
+posR <- subset(z$layout, grepl("strip-r", name), select = t:r)
+posT <- subset(z$layout, grepl("strip-t", name), select = t:r)
+
+# Add a new column to the right of current right strips, 
+# and a new row on top of current top strips
+width <- z$widths[max(posR$r)]    # width of current right strips
+height <- z$heights[min(posT$t)]  # height of current top strips
+
+z <- gtable_add_cols(z, width, max(posR$r))  
+z <- gtable_add_rows(z, height, min(posT$t)-1)
+
+# Construct the new strip grobs
+stripR <- gTree(name = "Strip_right", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelR, rot = -90, gp = gpar(fontsize = 16, col = "grey10"))))
+
+stripT <- gTree(name = "Strip_top", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelT, gp = gpar(fontsize = 16, col = "grey10"))))
+
+# Position the grobs in the gtable
+z <- gtable_add_grob(z, stripR, t = min(posR$t)+1, 
+                     l = max(posR$r) + 1, b = max(posR$b)+1, name = "strip-right")
+z <- gtable_add_grob(z, stripT, t = min(posT$t), 
+                     l = min(posT$l), r = max(posT$r), name = "strip-top")
+
+
+# Add small gaps between strips
+z <- gtable_add_cols(z, unit(1/5, "line"), max(posR$r))
+z <- gtable_add_rows(z, unit(1/5, "line"), min(posT$t))
+
+
+# Draw it
+grid.newpage()
+grid.draw(z)
+
+
+ggsave(filename = "Figures/EatingOutside_EatingInSameRestaurant_GridLabel.jpg", width = 40, height = 20, units = "cm", dpi = 600, plot = z)
+
+#### 
+p <- ggplot(data, aes(x=Age, y=Income, color=RelationshipStatus, shape=Gender)) +
+  geom_point(size = 4, alpha = 1, stroke = 2) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=16, face = "bold"), 
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(EatingOutside ~ Occupation)
+
+# Labels 
+labelR = "How often do you buy food from a restaurant?"
+labelT = "What is your current occupation?"
+
+# Get the ggplot grob
+z <- ggplotGrob(p)
+
+# Get the positions of the strips in the gtable: t = top, l = left, ...
+posR <- subset(z$layout, grepl("strip-r", name), select = t:r)
+posT <- subset(z$layout, grepl("strip-t", name), select = t:r)
+
+# Add a new column to the right of current right strips, 
+# and a new row on top of current top strips
+width <- z$widths[max(posR$r)]    # width of current right strips
+height <- z$heights[min(posT$t)]  # height of current top strips
+
+z <- gtable_add_cols(z, width, max(posR$r))  
+z <- gtable_add_rows(z, height, min(posT$t)-1)
+
+# Construct the new strip grobs
+stripR <- gTree(name = "Strip_right", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelR, rot = -90, gp = gpar(fontsize = 16, col = "grey10"))))
+
+stripT <- gTree(name = "Strip_top", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelT, gp = gpar(fontsize = 16, col = "grey10"))))
+
+# Position the grobs in the gtable
+z <- gtable_add_grob(z, stripR, t = min(posR$t)+1, 
+                     l = max(posR$r) + 1, b = max(posR$b)+1, name = "strip-right")
+z <- gtable_add_grob(z, stripT, t = min(posT$t), 
+                     l = min(posT$l), r = max(posT$r), name = "strip-top")
+
+
+# Add small gaps between strips
+z <- gtable_add_cols(z, unit(1/5, "line"), max(posR$r))
+z <- gtable_add_rows(z, unit(1/5, "line"), min(posT$t))
+
+
+# Draw it
+grid.newpage()
+grid.draw(z)
+
+
+ggsave(filename = "Figures/EatingOutside_Occupation_GridLabel.jpg", width = 40, height = 20, units = "cm", dpi = 600, plot = z)
+
+####
+### CombinedLoyltyApp vs ...
+
+p <- ggplot(data, aes(x=Age, y=Income, color=RelationshipStatus, shape=Gender)) +
+  geom_point(size = 4, alpha = 1, stroke = 2) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=16, face = "bold"), 
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(CombinedLoyltyApp ~ EatingInSameRestaurant)
+
+# Labels 
+labelR = paste("Would you be interested in an app for all restaurants, bars and cafeés", "\nthat combines loyalty purchases in one?")
+labelT = "How often do you go to the same restaurant, café or bar?"
+
+# Get the ggplot grob
+z <- ggplotGrob(p)
+
+# Get the positions of the strips in the gtable: t = top, l = left, ...
+posR <- subset(z$layout, grepl("strip-r", name), select = t:r)
+posT <- subset(z$layout, grepl("strip-t", name), select = t:r)
+
+# Add a new column to the right of current right strips, 
+# and a new row on top of current top strips
+width <- z$widths[max(posR$r)]    # width of current right strips
+height <- z$heights[min(posT$t)]  # height of current top strips
+
+z <- gtable_add_cols(z, width, max(posR$r))  
+z <- gtable_add_rows(z, height, min(posT$t)-1)
+
+# Construct the new strip grobs
+stripR <- gTree(name = "Strip_right", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelR, rot = -90, gp = gpar(fontsize = 10, col = "grey10"))))
+
+stripT <- gTree(name = "Strip_top", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelT, gp = gpar(fontsize = 16, col = "grey10"))))
+
+# Position the grobs in the gtable
+z <- gtable_add_grob(z, stripR, t = min(posR$t)+1, 
+                     l = max(posR$r) + 1, b = max(posR$b)+1, name = "strip-right")
+z <- gtable_add_grob(z, stripT, t = min(posT$t), 
+                     l = min(posT$l), r = max(posT$r), name = "strip-top")
+
+# Add small gaps between strips
+z <- gtable_add_cols(z, unit(1/5, "line"), max(posR$r))
+z <- gtable_add_rows(z, unit(1/5, "line"), min(posT$t))
+
+# Draw it
+grid.newpage()
+grid.draw(z)
+
+ggsave(filename = "Figures/CombinedLoyltyApp_EatingInSameRestaurant_GridLabel.jpg", width = 40, height = 20, units = "cm", dpi = 600, plot = z)
+
+####
+p <- ggplot(data, aes(x=Age, y=Income, color=RelationshipStatus, shape=Gender)) +
+  geom_point(size = 4, alpha = 1, stroke = 2) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=16, face = "bold"), 
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(CombinedLoyltyApp ~ EatingOutside)
+
+# Labels 
+labelR = paste("Would you be interested in an app for all restaurants, bars and cafeés", "\nthat combines loyalty purchases in one?")
+labelT = "How often do you buy food from a restaurant?"
+
+# Get the ggplot grob
+z <- ggplotGrob(p)
+
+# Get the positions of the strips in the gtable: t = top, l = left, ...
+posR <- subset(z$layout, grepl("strip-r", name), select = t:r)
+posT <- subset(z$layout, grepl("strip-t", name), select = t:r)
+
+# Add a new column to the right of current right strips, 
+# and a new row on top of current top strips
+width <- z$widths[max(posR$r)]    # width of current right strips
+height <- z$heights[min(posT$t)]  # height of current top strips
+
+z <- gtable_add_cols(z, width, max(posR$r))  
+z <- gtable_add_rows(z, height, min(posT$t)-1)
+
+# Construct the new strip grobs
+stripR <- gTree(name = "Strip_right", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelR, rot = -90, gp = gpar(fontsize = 10, col = "grey10"))))
+
+stripT <- gTree(name = "Strip_top", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelT, gp = gpar(fontsize = 16, col = "grey10"))))
+
+# Position the grobs in the gtable
+z <- gtable_add_grob(z, stripR, t = min(posR$t)+1, 
+                     l = max(posR$r) + 1, b = max(posR$b)+1, name = "strip-right")
+z <- gtable_add_grob(z, stripT, t = min(posT$t), 
+                     l = min(posT$l), r = max(posT$r), name = "strip-top")
+
+# Add small gaps between strips
+z <- gtable_add_cols(z, unit(1/5, "line"), max(posR$r))
+z <- gtable_add_rows(z, unit(1/5, "line"), min(posT$t))
+
+# Draw it
+grid.newpage()
+grid.draw(z)
+
+ggsave(filename = "Figures/CombinedLoyltyApp_EatingOutside_GridLabel.jpg", width = 40, height = 20, units = "cm", dpi = 600, plot = z)
+
+####
+p <- ggplot(data, aes(x=Age, y=Income, color=RelationshipStatus, shape=Gender)) +
+  geom_point(size = 4, alpha = 1, stroke = 2) +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 24), 
+        axis.text = element_text(angle=0, vjust=0.5, size=16, face = "bold"), 
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(CombinedLoyltyApp ~ UseLoyaltyApps)
+
+# Labels 
+labelR = paste("Would you be interested in an app for all restaurants, bars and cafeés", "\nthat combines loyalty purchases in one?")
+labelT = "Do you currently use a customer loyalty app/stamp cards? (McDonald's Rewards Program, Pressbyran Stämpelkort, Wolt Credit, etc.)"
+
+# Get the ggplot grob
+z <- ggplotGrob(p)
+
+# Get the positions of the strips in the gtable: t = top, l = left, ...
+posR <- subset(z$layout, grepl("strip-r", name), select = t:r)
+posT <- subset(z$layout, grepl("strip-t", name), select = t:r)
+
+# Add a new column to the right of current right strips, 
+# and a new row on top of current top strips
+width <- z$widths[max(posR$r)]    # width of current right strips
+height <- z$heights[min(posT$t)]  # height of current top strips
+
+z <- gtable_add_cols(z, width, max(posR$r))  
+z <- gtable_add_rows(z, height, min(posT$t)-1)
+
+# Construct the new strip grobs
+stripR <- gTree(name = "Strip_right", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelR, rot = -90, gp = gpar(fontsize = 10, col = "grey10"))))
+
+stripT <- gTree(name = "Strip_top", children = gList(
+   rectGrob(gp = gpar(col = NA, fill = "grey85")),
+   textGrob(labelT, gp = gpar(fontsize = 11, col = "grey10"))))
+
+# Position the grobs in the gtable
+z <- gtable_add_grob(z, stripR, t = min(posR$t)+1, 
+                     l = max(posR$r) + 1, b = max(posR$b)+1, name = "strip-right")
+z <- gtable_add_grob(z, stripT, t = min(posT$t), 
+                     l = min(posT$l), r = max(posT$r), name = "strip-top")
+
+# Add small gaps between strips
+z <- gtable_add_cols(z, unit(1/5, "line"), max(posR$r))
+z <- gtable_add_rows(z, unit(1/5, "line"), min(posT$t))
+
+# Draw it
+grid.newpage()
+grid.draw(z)
+
+
+ggsave(filename = "Figures/CombinedLoyltyApp_UseLoyaltyApps_GridLabel.jpg", width = 40, height = 20, units = "cm", dpi = 600, plot = z)
+
+####
+```
+
+#### Stats
+
+```{r}
+
+# Gender
+# Age
+# Occupation
+# RelationshipStatus
+# Income
+# EatingOutside
+# EatingInSameRestaurant
+# UseLoyaltyApps
+# FreqUsageOfLoyaltyApps
+# AreYouLoyalCustomer
+# AppSuggestion
+# RedeemVoucher
+# CombinedLoyltyApp
+
+# 
+# a <- chisq.test(data$Gender, data$Gender)
+# b <- chisq.test(data$Gender, data$Age)
+# c <- chisq.test(data$Gender, data$Occupation)
+# d <- chisq.test(data$Gender, data$RelationshipStatus)
+# e <- chisq.test(data$Gender, data$Income)
+# f <- chisq.test(data$Gender, data$EatingOutside)
+# g <- chisq.test(data$Gender, data$EatingInSameRestaurant)
+# h <- chisq.test(data$Gender, data$UseLoyaltyApps)
+# i <- chisq.test(data$Gender, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$Gender, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$Gender, data$AppSuggestion)
+# l <- chisq.test(data$Gender, data$RedeemVoucher)
+# m <- chisq.test(data$Gender, data$CombinedLoyltyApp)
+# 
+# gender <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# 
+# a <- chisq.test(data$Age, data$Gender)
+# b <- chisq.test(data$Age, data$Age)
+# c <- chisq.test(data$Age, data$Occupation)
+# d <- chisq.test(data$Age, data$RelationshipStatus)
+# e <- chisq.test(data$Age, data$Income)
+# f <- chisq.test(data$Age, data$EatingOutside)
+# g <- chisq.test(data$Age, data$EatingInSameRestaurant)
+# h <- chisq.test(data$Age, data$UseLoyaltyApps)
+# i <- chisq.test(data$Age, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$Age, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$Age, data$AppSuggestion)
+# l <- chisq.test(data$Age, data$RedeemVoucher)
+# m <- chisq.test(data$Age, data$CombinedLoyltyApp)
+# 
+# age <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# a <- chisq.test(data$Occupation, data$Gender)
+# b <- chisq.test(data$Occupation, data$Age)
+# c <- chisq.test(data$Occupation, data$Occupation)
+# d <- chisq.test(data$Occupation, data$RelationshipStatus)
+# e <- chisq.test(data$Occupation, data$Income)
+# f <- chisq.test(data$Occupation, data$EatingOutside)
+# g <- chisq.test(data$Occupation, data$EatingInSameRestaurant)
+# h <- chisq.test(data$Occupation, data$UseLoyaltyApps)
+# i <- chisq.test(data$Occupation, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$Occupation, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$Occupation, data$AppSuggestion)
+# l <- chisq.test(data$Occupation, data$RedeemVoucher)
+# m <- chisq.test(data$Occupation, data$CombinedLoyltyApp)
+# 
+# occupation <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# a <- chisq.test(data$RelationshipStatus, data$Gender)
+# b <- chisq.test(data$RelationshipStatus, data$Age)
+# c <- chisq.test(data$RelationshipStatus, data$Occupation)
+# d <- chisq.test(data$RelationshipStatus, data$RelationshipStatus)
+# e <- chisq.test(data$RelationshipStatus, data$Income)
+# f <- chisq.test(data$RelationshipStatus, data$EatingOutside)
+# g <- chisq.test(data$RelationshipStatus, data$EatingInSameRestaurant)
+# h <- chisq.test(data$RelationshipStatus, data$UseLoyaltyApps)
+# i <- chisq.test(data$RelationshipStatus, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$RelationshipStatus, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$RelationshipStatus, data$AppSuggestion)
+# l <- chisq.test(data$RelationshipStatus, data$RedeemVoucher)
+# m <- chisq.test(data$RelationshipStatus, data$CombinedLoyltyApp)
+# 
+# relationshipStatus <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# 
+# a <- chisq.test(data$Income, data$Gender)
+# b <- chisq.test(data$Income, data$Age)
+# c <- chisq.test(data$Income, data$Occupation)
+# d <- chisq.test(data$Income, data$RelationshipStatus)
+# e <- chisq.test(data$Income, data$Income)
+# f <- chisq.test(data$Income, data$EatingOutside)
+# g <- chisq.test(data$Income, data$EatingInSameRestaurant)
+# h <- chisq.test(data$Income, data$UseLoyaltyApps)
+# i <- chisq.test(data$Income, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$Income, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$Income, data$AppSuggestion)
+# l <- chisq.test(data$Income, data$RedeemVoucher)
+# m <- chisq.test(data$Income, data$CombinedLoyltyApp)
+# 
+# income <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# 
+# a <- chisq.test(data$EatingOutside, data$Gender)
+# b <- chisq.test(data$EatingOutside, data$Age)
+# c <- chisq.test(data$EatingOutside, data$Occupation)
+# d <- chisq.test(data$EatingOutside, data$RelationshipStatus)
+# e <- chisq.test(data$EatingOutside, data$Income)
+# f <- chisq.test(data$EatingOutside, data$EatingOutside)
+# g <- chisq.test(data$EatingOutside, data$EatingInSameRestaurant)
+# h <- chisq.test(data$EatingOutside, data$UseLoyaltyApps)
+# i <- chisq.test(data$EatingOutside, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$EatingOutside, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$EatingOutside, data$AppSuggestion)
+# l <- chisq.test(data$EatingOutside, data$RedeemVoucher)
+# m <- chisq.test(data$EatingOutside, data$CombinedLoyltyApp)
+# 
+# eatingOutside <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# 
+# a <- chisq.test(data$EatingInSameRestaurant, data$Gender)
+# b <- chisq.test(data$EatingInSameRestaurant, data$Age)
+# c <- chisq.test(data$EatingInSameRestaurant, data$Occupation)
+# d <- chisq.test(data$EatingInSameRestaurant, data$RelationshipStatus)
+# e <- chisq.test(data$EatingInSameRestaurant, data$Income)
+# f <- chisq.test(data$EatingInSameRestaurant, data$EatingOutside)
+# g <- chisq.test(data$EatingInSameRestaurant, data$EatingInSameRestaurant)
+# h <- chisq.test(data$EatingInSameRestaurant, data$UseLoyaltyApps)
+# i <- chisq.test(data$EatingInSameRestaurant, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$EatingInSameRestaurant, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$EatingInSameRestaurant, data$AppSuggestion)
+# l <- chisq.test(data$EatingInSameRestaurant, data$RedeemVoucher)
+# m <- chisq.test(data$EatingInSameRestaurant, data$CombinedLoyltyApp)
+# 
+# eatingInSameRestaurant <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# 
+# 
+# a <- chisq.test(data$UseLoyaltyApps, data$Gender)
+# b <- chisq.test(data$UseLoyaltyApps, data$Age)
+# c <- chisq.test(data$UseLoyaltyApps, data$Occupation)
+# d <- chisq.test(data$UseLoyaltyApps, data$RelationshipStatus)
+# e <- chisq.test(data$UseLoyaltyApps, data$Income)
+# f <- chisq.test(data$UseLoyaltyApps, data$EatingOutside)
+# g <- chisq.test(data$UseLoyaltyApps, data$EatingInSameRestaurant)
+# h <- chisq.test(data$UseLoyaltyApps, data$UseLoyaltyApps)
+# i <- chisq.test(data$UseLoyaltyApps, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$UseLoyaltyApps, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$UseLoyaltyApps, data$AppSuggestion)
+# l <- chisq.test(data$UseLoyaltyApps, data$RedeemVoucher)
+# m <- chisq.test(data$UseLoyaltyApps, data$CombinedLoyltyApp)
+# 
+# useLoyaltyApps <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# a <- chisq.test(data$FreqUsageOfLoyaltyApps, data$Gender)
+# b <- chisq.test(data$FreqUsageOfLoyaltyApps, data$Age)
+# c <- chisq.test(data$FreqUsageOfLoyaltyApps, data$Occupation)
+# d <- chisq.test(data$FreqUsageOfLoyaltyApps, data$RelationshipStatus)
+# e <- chisq.test(data$FreqUsageOfLoyaltyApps, data$Income)
+# f <- chisq.test(data$FreqUsageOfLoyaltyApps, data$EatingOutside)
+# g <- chisq.test(data$FreqUsageOfLoyaltyApps, data$EatingInSameRestaurant)
+# h <- chisq.test(data$FreqUsageOfLoyaltyApps, data$UseLoyaltyApps)
+# i <- chisq.test(data$FreqUsageOfLoyaltyApps, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$FreqUsageOfLoyaltyApps, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$FreqUsageOfLoyaltyApps, data$AppSuggestion)
+# l <- chisq.test(data$FreqUsageOfLoyaltyApps, data$RedeemVoucher)
+# m <- chisq.test(data$FreqUsageOfLoyaltyApps, data$CombinedLoyltyApp)
+# 
+# freqUsageOfLoyaltyApps <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# 
+# a <- chisq.test(data$AreYouLoyalCustomer, data$Gender)
+# b <- chisq.test(data$AreYouLoyalCustomer, data$Age)
+# c <- chisq.test(data$AreYouLoyalCustomer, data$Occupation)
+# d <- chisq.test(data$AreYouLoyalCustomer, data$RelationshipStatus)
+# e <- chisq.test(data$AreYouLoyalCustomer, data$Income)
+# f <- chisq.test(data$AreYouLoyalCustomer, data$EatingOutside)
+# g <- chisq.test(data$AreYouLoyalCustomer, data$EatingInSameRestaurant)
+# h <- chisq.test(data$AreYouLoyalCustomer, data$UseLoyaltyApps)
+# i <- chisq.test(data$AreYouLoyalCustomer, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$AreYouLoyalCustomer, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$AreYouLoyalCustomer, data$AppSuggestion)
+# l <- chisq.test(data$AreYouLoyalCustomer, data$RedeemVoucher)
+# m <- chisq.test(data$AreYouLoyalCustomer, data$CombinedLoyltyApp)
+# 
+# areYouLoyalCustomer <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# a <- chisq.test(data$AppSuggestion, data$Gender)
+# b <- chisq.test(data$AppSuggestion, data$Age)
+# c <- chisq.test(data$AppSuggestion, data$Occupation)
+# d <- chisq.test(data$AppSuggestion, data$RelationshipStatus)
+# e <- chisq.test(data$AppSuggestion, data$Income)
+# f <- chisq.test(data$AppSuggestion, data$EatingOutside)
+# g <- chisq.test(data$AppSuggestion, data$EatingInSameRestaurant)
+# h <- chisq.test(data$AppSuggestion, data$UseLoyaltyApps)
+# i <- chisq.test(data$AppSuggestion, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$AppSuggestion, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$AppSuggestion, data$AppSuggestion)
+# l <- chisq.test(data$AppSuggestion, data$RedeemVoucher)
+# m <- chisq.test(data$AppSuggestion, data$CombinedLoyltyApp)
+# 
+# appSuggestion <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# a <- chisq.test(data$RedeemVoucher, data$Gender)
+# b <- chisq.test(data$RedeemVoucher, data$Age)
+# c <- chisq.test(data$RedeemVoucher, data$Occupation)
+# d <- chisq.test(data$RedeemVoucher, data$RelationshipStatus)
+# e <- chisq.test(data$RedeemVoucher, data$Income)
+# f <- chisq.test(data$RedeemVoucher, data$EatingOutside)
+# g <- chisq.test(data$RedeemVoucher, data$EatingInSameRestaurant)
+# h <- chisq.test(data$RedeemVoucher, data$UseLoyaltyApps)
+# i <- chisq.test(data$RedeemVoucher, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$RedeemVoucher, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$RedeemVoucher, data$AppSuggestion)
+# l <- chisq.test(data$RedeemVoucher, data$RedeemVoucher)
+# m <- chisq.test(data$RedeemVoucher, data$CombinedLoyltyApp)
+# 
+# redeemVoucher <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# a <- chisq.test(data$CombinedLoyltyApp, data$Gender)
+# b <- chisq.test(data$CombinedLoyltyApp, data$Age)
+# c <- chisq.test(data$CombinedLoyltyApp, data$Occupation)
+# d <- chisq.test(data$CombinedLoyltyApp, data$RelationshipStatus)
+# e <- chisq.test(data$CombinedLoyltyApp, data$Income)
+# f <- chisq.test(data$CombinedLoyltyApp, data$EatingOutside)
+# g <- chisq.test(data$CombinedLoyltyApp, data$EatingInSameRestaurant)
+# h <- chisq.test(data$CombinedLoyltyApp, data$UseLoyaltyApps)
+# i <- chisq.test(data$CombinedLoyltyApp, data$FreqUsageOfLoyaltyApps)
+# j <- chisq.test(data$CombinedLoyltyApp, data$AreYouLoyalCustomer)
+# k <- chisq.test(data$CombinedLoyltyApp, data$AppSuggestion)
+# l <- chisq.test(data$CombinedLoyltyApp, data$RedeemVoucher)
+# m <- chisq.test(data$CombinedLoyltyApp, data$CombinedLoyltyApp)
+# 
+# combinedLoyltyApp <- rbind(a, b, c, d, e, f, g, h, i , j, k, l, m)
+# 
+# 
+# chitestindividual <- rbind(gender, age, occupation, relationshipStatus, income, eatingOutside, eatingInSameRestaurant, useLoyaltyApps, freqUsageOfLoyaltyApps, areYouLoyalCustomer, appSuggestion, redeemVoucher, combinedLoyltyApp)
+# 
+# write.csv(chitestindividual, "test.csv")
+```
+
+#### Heatmap 
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, include=TRUE, fig.align = 'center', out.width = "100%"}
+corrmatrixdata <- read_csv("CoorelationMatrix.csv")
+
+corrmatrixdf <- as.data.frame(corrmatrixdata)
+
+selecteddf <- corrmatrixdf %>% 
+  pivot_longer(-Matrix)
+
+selecteddf$Matrix <- factor(selecteddf$Matrix, 
+                         levels = c("Gender", "Age", "Occupation", 
+                                    "RelationshipStatus", "Income",
+                                    "EatingOutside", "EatingInSameRestaurant",
+                                    "UseLoyaltyApps", "FreqUsageOfLoyaltyApps",
+                                    "AreYouLoyalCustomer", "AppSuggestion",
+                                    "RedeemVoucher", "CombinedLoyltyApp"))
+selecteddf$name <- factor(selecteddf$name, 
+                         levels =  c("Gender", "Age", "Occupation",
+                                     "RelationshipStatus", "Income",
+                                     "EatingOutside", "EatingInSameRestaurant",
+                                    "UseLoyaltyApps", "FreqUsageOfLoyaltyApps",
+                                    "AreYouLoyalCustomer", "AppSuggestion",
+                                    "RedeemVoucher","CombinedLoyltyApp"))
+
+ggplot(selecteddf, aes(x = Matrix, y = name, fill = value)) + 
+  geom_tile(aes(fill = value)) + 
+  geom_text(aes(label = round(value, 3)), size = 6, fontface = "bold") + 
+  scale_fill_gradient(low = "green", high = "red") +
+  labs(x = "", y = "") +
+  theme(panel.grid.major = element_line(size = 0.5, color = "grey"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(size = 0.7, color = "black"),
+        text = element_text(size = 28), 
+        axis.text = element_text(angle=0, vjust=0.5, size=16, face = "bold"), 
+        axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.subtitle=element_text(size=18, hjust=0.5, color="black")) 
+
+
+ggsave(filename = "Figures/Correlation_Matrix.jpg", width = 40, height = 40, units = "cm", dpi = 600)
+```
+
