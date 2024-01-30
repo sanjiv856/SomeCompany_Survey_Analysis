@@ -1,4 +1,4 @@
-# Project Title: Analyzing Privacy Concerns with Likert Scale Questionnaire Data
+# Analyzing Privacy Concerns with Likert Scale Questionnaire Data
 
 ## Overview:
 This project focuses on analyzing the privacy concerns of users regarding the acceptance of third-party cookies. The analysis is based on data collected through an online questionnaire survey, which utilized a Likert scale to measure participants' attitudes and perceptions.
